@@ -18,6 +18,18 @@ class SearchKnowledgeTest extends TestCase
     /**
      * @test
      */
+    public function can_has_no_knowledges()
+    {
+
+        $response = $this->getJson('api/knowledges');
+
+        $this->assertResponseIsOk($response, 'Didn\'t find shit.');
+
+    }
+
+    /**
+     * @test
+     */
     public function gets_all_knowledges()
     {
 
@@ -25,27 +37,7 @@ class SearchKnowledgeTest extends TestCase
 
        $response = $this->getJson('api/knowledges');
 
-       $response->assertJson([
-           'status' => true,
-           'message' => 'Behold the knowledge!',
-           'data' => [
-               'results' => 3,
-               'knowledges' => [
-                   [
-                       'url' => $knowledges->first()->url(),
-                       'excerpt' => $knowledges->first()->excerpt(),
-                   ],
-                   [
-                       'url' => $knowledges->get(1)->url(),
-                       'excerpt' => $knowledges->get(1)->excerpt(),
-                   ],
-                   [
-                       'url' => $knowledges->get(2)->url(),
-                       'excerpt' => $knowledges->get(2)->excerpt(),
-                   ]
-               ],
-           ]
-       ]);
+       $this->assertResponseIsOk($response, 'Behold the knowledge!', $knowledges);
 
     }
 
@@ -61,19 +53,7 @@ class SearchKnowledgeTest extends TestCase
 
         $response = $this->getJson('api/knowledges?search=shoes');
 
-        $response->assertJson([
-            'status' => true,
-            'message' => 'Look what I know about this',
-            'data' => [
-                'results' => 1,
-                'knowledges' => [
-                    [
-                        'url' => $knowledge->url(),
-                        'excerpt' => $knowledge->excerpt(),
-                    ]
-                ],
-            ]
-        ]);
+        $this->assertResponseIsOk($response, 'Look what I know about this', $knowledge);
 
     }
 
@@ -85,14 +65,7 @@ class SearchKnowledgeTest extends TestCase
 
         $response = $this->getJson('api/knowledges?search=nothing');
 
-        $response->assertJson([
-            'status' => true,
-            'message' => 'I dont\'t know about this',
-            'data' => [
-                'results' => 0,
-                'knowledges' => [],
-            ]
-        ]);
+        $this->assertResponseIsOk($response, 'I dont\'t know about this', []);
 
     }
 
@@ -108,25 +81,41 @@ class SearchKnowledgeTest extends TestCase
 
         $response = $this->getJson('api/knowledges?search=shoes');
 
+        $this->assertResponseIsOk($response, 'Look what I know about this', $knowledges);
+
+    }
+
+    /**
+     * Assert if the response is ok.
+     *
+     * @param $response
+     * @param $message
+     * @param $knowledges
+     */
+    protected function assertResponseIsOk($response, $message, $knowledges = [])
+    {
+
+        if ($knowledges instanceof Knowledge)
+            $knowledges = [$knowledges];
+
+        $results = [];
+
+        foreach ($knowledges as $knowledge) {
+
+            $results[] = [
+                'url' => $knowledge->url(),
+                'excerpt' => $knowledge->excerpt(),
+                'content' => $knowledge->content,
+            ];
+
+        }
+
         $response->assertJson([
             'status' => true,
-            'message' => 'Look what I know about this',
+            'message' => $message,
             'data' => [
-                'results' => 3,
-                'knowledges' => [
-                    [
-                        'url' => $knowledges->first()->url(),
-                        'excerpt' => $knowledges->first()->excerpt(),
-                    ],
-                    [
-                        'url' => $knowledges->get(1)->url(),
-                        'excerpt' => $knowledges->get(1)->excerpt(),
-                    ],
-                    [
-                        'url' => $knowledges->get(2)->url(),
-                        'excerpt' => $knowledges->get(2)->excerpt(),
-                    ]
-                ],
+                'results' => count($knowledges),
+                'knowledges' => $results,
             ]
         ]);
 

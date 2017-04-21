@@ -61,6 +61,7 @@ class KnowledgeIndexFormatter
             $results[] = [
                 'url' => $knowledge->url(),
                 'excerpt' => $knowledge->excerpt(),
+                'content' => $knowledge->content,
             ];
 
         }
