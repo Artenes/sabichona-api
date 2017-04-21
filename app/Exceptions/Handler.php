@@ -5,6 +5,10 @@ namespace Sabichona\Exceptions;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -44,7 +48,24 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        return parent::render($request, $exception);
+
+        if ($exception instanceof NotFoundHttpException)
+            return new JsonResponse([
+                'status' => false,
+                'message' => 'They say ignorance is bliss. I say is bullshit.',
+            ], Response::HTTP_NOT_FOUND);
+
+        if ($exception instanceof ValidationException)
+            return $exception->getResponse();
+
+        return new JsonResponse([
+            'status' => false,
+            'message' => 'I forgot how to serve a service.',
+            'errors' => [
+                $exception->getCode() => $exception->getMessage(),
+            ],
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+
     }
 
     /**
