@@ -3,6 +3,7 @@
 namespace Sabichona\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Sabichona\Formatters\KnowledgeIndexFormatter;
 use Sabichona\Http\Requests\StoreKnowledgeRequest;
 use Sabichona\Models\Knowledge;
 
@@ -24,34 +25,9 @@ class KnowledgesController extends Controller
 
         $knowledges = Knowledge::remember($request->get('search'));
 
-        $results = [];
+        $formatter = new KnowledgeIndexFormatter($knowledges, $request->has('search'));
 
-        foreach ($knowledges as $knowledge) {
-
-            $results[] = [
-                'url' => $knowledge->url(),
-                'excerpt' => $knowledge->excerpt(),
-            ];
-
-        }
-
-        if (! $request->has('search'))
-            $message = 'Behold the knowledge!';
-        else if ($knowledges->count() > 0)
-            $message = 'Look what I know about this';
-        else
-            $message = 'I dont\'t know about this';
-
-        return [
-
-            'status' => true,
-            'message' => $message,
-            'data' => [
-                'results' => $knowledges->count(),
-                'knowledges' => $results,
-            ],
-
-        ];
+        return $formatter->formatResponse();
 
     }
 
