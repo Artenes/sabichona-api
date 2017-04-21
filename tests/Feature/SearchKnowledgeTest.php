@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Http\Response;
 use Sabichona\Models\Knowledge;
 use Tests\TestCase;
 
@@ -23,7 +24,9 @@ class SearchKnowledgeTest extends TestCase
 
         $response = $this->getJson('api/knowledges');
 
-        $this->assertResponseIsOk($response, 'Didn\'t find shit.');
+        $response->assertStatus(Response::HTTP_NOT_FOUND);
+
+        $this->assertResponseHasRightStructure($response, 'Didn\'t find shit.');
 
     }
 
@@ -37,7 +40,7 @@ class SearchKnowledgeTest extends TestCase
 
        $response = $this->getJson('api/knowledges');
 
-       $this->assertResponseIsOk($response, 'Behold the knowledge!', $knowledges);
+       $this->assertResponseHasRightStructure($response, 'Behold the knowledge!', $knowledges);
 
     }
 
@@ -53,7 +56,7 @@ class SearchKnowledgeTest extends TestCase
 
         $response = $this->getJson('api/knowledges?search=shoes');
 
-        $this->assertResponseIsOk($response, 'Look what I know about this', $knowledge);
+        $this->assertResponseHasRightStructure($response, 'Look what I know about this', $knowledge);
 
     }
 
@@ -65,7 +68,9 @@ class SearchKnowledgeTest extends TestCase
 
         $response = $this->getJson('api/knowledges?search=nothing');
 
-        $this->assertResponseIsOk($response, 'I dont\'t know about this', []);
+        $response->assertStatus(Response::HTTP_NOT_FOUND);
+
+        $this->assertResponseHasRightStructure($response, 'I dont\'t know about this', []);
 
     }
 
@@ -81,18 +86,18 @@ class SearchKnowledgeTest extends TestCase
 
         $response = $this->getJson('api/knowledges?search=shoes');
 
-        $this->assertResponseIsOk($response, 'Look what I know about this', $knowledges);
+        $this->assertResponseHasRightStructure($response, 'Look what I know about this', $knowledges);
 
     }
 
     /**
-     * Assert if the response is ok.
+     * Assert if the response has the right structure.
      *
      * @param $response
      * @param $message
      * @param $knowledges
      */
-    protected function assertResponseIsOk($response, $message, $knowledges = [])
+    protected function assertResponseHasRightStructure($response, $message, $knowledges = [])
     {
 
         if ($knowledges instanceof Knowledge)
@@ -111,7 +116,7 @@ class SearchKnowledgeTest extends TestCase
         }
 
         $response->assertJson([
-            'status' => true,
+            'status' => count($knowledges) > 0,
             'message' => $message,
             'data' => [
                 'results' => count($knowledges),

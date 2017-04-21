@@ -2,7 +2,9 @@
 
 namespace Sabichona\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Sabichona\Formatters\KnowledgeIndexFormatter;
 use Sabichona\Http\Requests\StoreKnowledgeRequest;
 use Sabichona\Models\Knowledge;
@@ -18,7 +20,7 @@ class KnowledgesController extends Controller
      * Shows all knowledges or search for them.
      *
      * @param Request $request
-     * @return array
+     * @return array|JsonResponse
      */
     public function index(Request $request)
     {
@@ -27,7 +29,12 @@ class KnowledgesController extends Controller
 
         $formatter = new KnowledgeIndexFormatter($knowledges, $request->has('search'));
 
-        return $formatter->formatResponse();
+        $response = $formatter->formatResponse();
+
+        if ($formatter->status() === false)
+            return new JsonResponse($response, Response::HTTP_NOT_FOUND);
+
+        return $response;
 
     }
 

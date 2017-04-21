@@ -35,7 +35,7 @@ class KnowledgeIndexFormatter
 
         return [
 
-            'status' => true,
+            'status' => $this->status(),
             'message' => $this->message(),
             'data' => [
                 'results' => count($this->knowledges),
@@ -47,11 +47,23 @@ class KnowledgeIndexFormatter
     }
 
     /**
+     * Get the status for the response.
+     *
+     * @return bool
+     */
+    public function status()
+    {
+
+        return count($this->knowledges) > 0;
+
+    }
+
+    /**
      * Format the knowledges as an array.
      *
      * @return array
      */
-    protected function knowledges()
+    public function knowledges()
     {
 
         $results = [];
@@ -75,7 +87,7 @@ class KnowledgeIndexFormatter
      *
      * @return string
      */
-    protected function message()
+    public function message()
     {
 
         $itHasResults = count($this->knowledges) > 0;
