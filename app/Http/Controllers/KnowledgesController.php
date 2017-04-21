@@ -39,6 +39,28 @@ class KnowledgesController extends Controller
     }
 
     /**
+     * Shows the content of a knowledge.
+     *
+     * @param Knowledge $knowledge
+     * @return array
+     */
+    public function show(Knowledge $knowledge)
+    {
+
+        return [
+
+            'status' => true,
+            'message' => 'Here, have a knowledge.',
+            'data' => [
+                'url' => $knowledge->url(),
+                'content' => $knowledge->content,
+            ],
+
+        ];
+
+    }
+
+    /**
      * Store a knowledge.
      *
      * @param StoreKnowledgeRequest $request
