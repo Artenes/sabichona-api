@@ -6,6 +6,10 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Sabichona\Models\Knowledge;
 use Tests\TestCase;
 
+/**
+ * Test suite for searching a knowledge.
+ * @package Tests\Feature
+ */
 class SearchKnowledgeTest extends TestCase
 {
 
