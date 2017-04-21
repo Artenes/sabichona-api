@@ -64,7 +64,10 @@ class Knowledge extends Model
     public function excerpt()
     {
 
-        return substr($this->content, 0, 100);
+        if (strlen($this->content) > 97)
+            return substr($this->content, 0, 97) . '...';
+
+        return $this->content;
 
     }
 
