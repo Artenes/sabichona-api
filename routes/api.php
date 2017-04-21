@@ -13,4 +13,4 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::resource('knowledges', 'KnowledgesController', ['only' => ['store', 'show']]);
+Route::resource('knowledges', 'KnowledgesController', ['only' => ['store', 'show', 'index']]);

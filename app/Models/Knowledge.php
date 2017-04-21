@@ -2,6 +2,7 @@
 
 namespace Sabichona\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -36,6 +37,34 @@ class Knowledge extends Model
     {
 
         return route('knowledges.show', [$this->id]);
+
+    }
+
+    /**
+     * Retrieves the knowledge from the database.
+     *
+     * @param null $search
+     * @return Collection
+     */
+    public static function remember($search = null)
+    {
+
+        if ($search === null)
+            return static::get();
+
+        return static::where('content', 'like', "%{$search}%")->get();
+
+    }
+
+    /**
+     * Gets the knowledge excerpt.
+     *
+     * @return string
+     */
+    public function excerpt()
+    {
+
+        return substr($this->content, 0, 100);
 
     }
 

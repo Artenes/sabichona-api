@@ -22,3 +22,13 @@ $factory->define(Sabichona\User::class, function (Faker\Generator $faker) {
         'remember_token' => str_random(10),
     ];
 });
+
+$factory->define(Sabichona\Models\Knowledge::class, function (Faker\Generator $faker) {
+
+    return [
+
+        'content' => $faker->paragraph(),
+
+    ];
+
+});
