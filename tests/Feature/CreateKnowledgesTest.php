@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Faker\Factory;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
@@ -47,6 +48,26 @@ class CreateKnowledgesTest extends TestCase
             'errors' => [
                 'content' => ['The content field is required.'],
             ],
+        ]);
+
+    }
+
+    /**
+     * @test
+     */
+    public function content_can_only_be_500_characters_long()
+    {
+
+        $data = ['content' => str_random(501)];
+
+        $response = $this->postJson('api/knowledges', $data);
+
+        $response->assertJson([
+            'status' => false,
+            'message' => 'I didn\'t understood your knowledge',
+            'errors' => [
+                'content' => ['The content may not be greater than 500 characters.']
+            ]
         ]);
 
     }

@@ -34,7 +34,7 @@ class StoreKnowledgeRequest extends FormRequest
     {
 
         return [
-            'content' => 'required',
+            'content' => 'required|max:500',
         ];
 
     }

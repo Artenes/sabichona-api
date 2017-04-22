@@ -27,7 +27,7 @@ $factory->define(Sabichona\Models\Knowledge::class, function (Faker\Generator $f
 
     return [
 
-        'content' => $faker->paragraph(),
+        'content' => $faker->text(500),
 
     ];
 
