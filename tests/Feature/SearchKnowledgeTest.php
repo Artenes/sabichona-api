@@ -108,9 +108,8 @@ class SearchKnowledgeTest extends TestCase
         foreach ($knowledges as $knowledge) {
 
             $results[] = [
-                'url' => $knowledge->url(),
-                'excerpt' => $knowledge->excerpt(),
                 'content' => $knowledge->content,
+                'created_at' => $knowledge->created_at->toDateTimeString(),
             ];
 
         }
