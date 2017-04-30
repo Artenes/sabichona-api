@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Http\Response;
 use Sabichona\Models\Knowledge;
+use Sabichona\Models\Location;
 use Tests\TestCase;
 
 /**
@@ -16,112 +16,88 @@ class SearchKnowledgeTest extends TestCase
 
     use DatabaseMigrations;
 
+    protected $santarem = 'ChIJ1UqwPCH5iJIRR9Zn150_voA';
+
     /**
      * @test
      */
-    public function can_has_no_knowledges()
+    public function returns_recommendation_when_there_is_no_knowledge_in_location()
     {
 
-        $response = $this->getJson('api/knowledges');
+        $response = $this->search();
 
-        $response->assertStatus(Response::HTTP_NOT_FOUND);
-
-        $this->assertResponseHasRightStructure($response, 'Didn\'t find shit.');
+        $response->assertJson(['state' => 'first']);
 
     }
 
     /**
      * @test
      */
-    public function gets_all_knowledges()
+    public function do_not_find_knowledge()
     {
 
-       $knowledges = factory(Knowledge::class, 3)->create();
+        $location = factory(Location::class)->create(['uuid' => $this->santarem]);
+        factory(Knowledge::class)->create(['content' => 'dont_find_this', 'location_uuid' => $location->uuid]);
 
-       $response = $this->getJson('api/knowledges');
+        $response = $this->search('do_not_exist');
 
-       $this->assertResponseHasRightStructure($response, 'Behold the knowledge!', $knowledges);
+        $response->assertJson(['state' => 'nothing']);
 
     }
 
     /**
      * @test
      */
-    public function can_search_a_knowledge_by_content()
+    public function returns_random_knowledge_when_search_arg_is_not_provided()
     {
 
-        $knowledge = factory(Knowledge::class)->create([
-            'content' => 'I am selling a pair of shoes',
-        ]);
+        $location = factory(Location::class)->create(['uuid' => $this->santarem]);
+        factory(Knowledge::class, 5)->create(['location_uuid' => $location->uuid]);
 
-        $response = $this->getJson('api/knowledges?search=shoes');
+        $response = $this->search();
 
-        $this->assertResponseHasRightStructure($response, 'Look what I know about this', $knowledge);
+        $response->assertJson(['state' => 'random']);
 
     }
 
     /**
      * @test
      */
-    public function finds_nothing_by_searching_for_something_that_does_not_exists()
+    public function search_knowledge_by_content()
     {
 
-        $response = $this->getJson('api/knowledges?search=nothing');
+        $location = factory(Location::class)->create(['uuid' => $this->santarem]);
+        $knowledge = factory(Knowledge::class, 20)->create(['content' => 'find me!', 'location_uuid' => $location->uuid]);
 
-        $response->assertStatus(Response::HTTP_NOT_FOUND);
+        $response = $this->search('find me!');
 
-        $this->assertResponseHasRightStructure($response, 'I dont\'t know about this', []);
-
-    }
-
-    /**
-     * @test
-     */
-    public function finds_multiple_results()
-    {
-
-        $knowledges = factory(Knowledge::class, 3)->create([
-            'content' => 'I am selling a pair of shoes',
-        ]);
-
-        $response = $this->getJson('api/knowledges?search=shoes');
-
-        $this->assertResponseHasRightStructure($response, 'Look what I know about this', $knowledges);
-
-    }
-
-    /**
-     * Assert if the response has the right structure.
-     *
-     * @param $response
-     * @param $message
-     * @param $knowledges
-     */
-    protected function assertResponseHasRightStructure($response, $message, $knowledges = [])
-    {
-
-        if ($knowledges instanceof Knowledge)
-            $knowledges = [$knowledges];
-
-        $results = [];
-
-        foreach ($knowledges as $knowledge) {
-
-            $results[] = [
-                'content' => $knowledge->content,
-                'created_at' => $knowledge->created_at->toDateTimeString(),
-            ];
-
-        }
-
-        $response->assertJson([
-            'status' => count($knowledges) > 0,
-            'message' => $message,
-            'data' => [
-                'results' => count($knowledges),
-                'knowledges' => $results,
+        $response->assertJson(
+            [
+                'state' => 'found',
+                'total' => 20,
+                'knowledges' => [
+                    ['uuid' => $knowledge->first()->uuid]
+                ],
             ]
-        ]);
+        );
+
+    }
+
+    /**
+     * Make a search.
+     *
+     * @param null $content
+     * @return \Illuminate\Foundation\Testing\TestResponse
+     */
+    protected function search($content = null)
+    {
+
+        $url = 'api/knowledges/search/' . $this->santarem;
+
+        if ($content !== null)
+            $url .= '?search=' . $content;
+
+        return $this->getJson($url);
 
     }
 

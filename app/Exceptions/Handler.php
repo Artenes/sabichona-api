@@ -45,30 +45,12 @@ class Handler extends ExceptionHandler
      *
      * @param  \Illuminate\Http\Request $request
      * @param  \Exception $exception
-     * @return Response|JsonResponse
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function render($request, Exception $exception)
     {
 
-        if ($exception instanceof NotFoundHttpException)
-            return new JsonResponse([
-                'status' => false,
-                'message' => 'They say ignorance is bliss. I say is bullshit.',
-            ], Response::HTTP_NOT_FOUND);
-
-        if ($exception instanceof ValidationException)
-            return $exception->getResponse();
-
-        if ($exception instanceof ModelNotFoundException)
-            return $this->resolveModelNotFound($exception->getModel());
-
-        return new JsonResponse([
-            'status' => false,
-            'message' => 'I forgot how to serve a service.',
-            'errors' => [
-                $exception->getCode() => $exception->getMessage(),
-            ],
-        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        return parent::render($request, $exception);
 
     }
 
@@ -88,21 +70,4 @@ class Handler extends ExceptionHandler
         return redirect()->guest(route('login'));
     }
 
-    /**
-     * Resolve the not model found exception.
-     *
-     * @param $model
-     * @return JsonResponse
-     */
-    protected function resolveModelNotFound($model)
-    {
-
-        $data = [
-            'status' => false,
-            'message' => 'What the hell are you talking about?',
-        ];
-
-        return new JsonResponse($data, Response::HTTP_NOT_FOUND);
-
-    }
 }

@@ -12,22 +12,48 @@
 */
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
-$factory->define(Sabichona\User::class, function (Faker\Generator $faker) {
-    static $password;
+$factory->define(\Sabichona\Models\Location::class, function () {
 
     return [
+
+        'label' => 'Santarém, PA - Brasil',
+        'city' => 'Santarém',
+
+    ];
+
+});
+
+$factory->define(Sabichona\Models\User::class, function (Faker\Generator $faker) {
+
+    return [
+
+        'location_uuid' => function () {
+            return factory(Sabichona\Models\Location::class)->create()->uuid;
+        },
         'name' => $faker->name,
         'email' => $faker->unique()->safeEmail,
-        'password' => $password ?: $password = bcrypt('secret'),
-        'remember_token' => str_random(10),
+        'picture' => 'images/thumbnail_example.png',
+
     ];
+
 });
 
 $factory->define(Sabichona\Models\Knowledge::class, function (Faker\Generator $faker) {
 
     return [
 
+        'user_uuid' => function () {
+            return factory(\Sabichona\Models\User::class)->create()->uuid;
+        },
+        'user_name' => $faker->name,
+        'location_uuid' => function () {
+            return factory(\Sabichona\Models\Location::class)->create()->uuid;
+        },
+        'image' => 'images/example.png',
+        'image_medium' => 'images/example_medium.png',
+        'image_small' => 'images/example_small.png',
         'content' => $faker->text(500),
+        'attachment' => 'attachments/example.pdf',
 
     ];
 

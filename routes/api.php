@@ -13,4 +13,8 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::resource('knowledges', 'KnowledgesController', ['only' => ['store', 'show', 'index']]);
+Route::resource('users', 'UsersController', ['only' => 'show']);
+
+Route::get('knowledges/search/{location}', 'KnowledgesController@search')->name('knowledges.search');
+
+Route::resource('knowledges', 'KnowledgesController', ['only' => ['store', 'show']]);

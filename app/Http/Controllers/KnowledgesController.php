@@ -4,9 +4,8 @@ namespace Sabichona\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Sabichona\Formatters\KnowledgeIndexFormatter;
 use Sabichona\Http\Requests\StoreKnowledgeRequest;
+use Sabichona\Http\Responses\KnowledgeSearchResponse;
 use Sabichona\Models\Knowledge;
 
 /**
@@ -15,28 +14,6 @@ use Sabichona\Models\Knowledge;
  */
 class KnowledgesController extends Controller
 {
-
-    /**
-     * Shows all knowledges or search for them.
-     *
-     * @param Request $request
-     * @return array|JsonResponse
-     */
-    public function index(Request $request)
-    {
-
-        $knowledges = Knowledge::remember($request->get('search'));
-
-        $formatter = new KnowledgeIndexFormatter($knowledges, $request->has('search'));
-
-        $response = $formatter->formatResponse();
-
-        if ($formatter->status() === false)
-            return new JsonResponse($response, Response::HTTP_NOT_FOUND);
-
-        return $response;
-
-    }
 
     /**
      * Shows the content of a knowledge.
@@ -74,13 +51,41 @@ class KnowledgesController extends Controller
         return [
 
             'status' => true,
-            'message'=> 'You have shown me your knowledge',
+            'message' => 'You have shown me your knowledge',
             'data' => [
                 'id' => $knowledge->id,
                 'url' => $knowledge->url(),
             ],
 
         ];
+
+    }
+
+    /**
+     * Search for knowledges.
+     *
+     * @param Request $request
+     * @param KnowledgeSearchResponse $response
+     * @return JsonResponse
+     */
+    public function search(Request $request, KnowledgeSearchResponse $response)
+    {
+
+        $location = $request->route('location');
+        $search = $request->get('search');
+
+        if (!Knowledge::isThereSomethingAt($location))
+            return $response->thereIsNothingInThisLocation();
+
+        if (empty($search))
+            return $response->randomKnowledge(Knowledge::random($location));
+
+        $results = Knowledge::search($location, $search);
+
+        if ($results->count() === 0)
+            return $response->foundNothing();
+
+        return $response->foundSomething($results, $search);
 
     }
 

@@ -4,6 +4,11 @@ namespace Sabichona\Models;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Storage;
+use Sabichona\Traits\Uuids;
 
 /**
  * Knowledge is any kind of information.
@@ -13,6 +18,22 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Knowledge extends Model
 {
+
+    use Uuids;
+
+    /**
+     * The primary key will be the uuid.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'uuid';
+
+    /**
+     * There will not be any auto incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
 
     /**
      * The name of the table.
@@ -43,31 +64,121 @@ class Knowledge extends Model
     /**
      * Retrieves the knowledge from the database.
      *
+     * @param $location
      * @param null $search
-     * @return Collection
+     * @return LengthAwarePaginator
      */
-    public static function remember($search = null)
+    public static function search($location, $search)
     {
 
-        if ($search === null)
-            return static::get();
-
-        return static::where('content', 'like', "%{$search}%")->get();
+        return static::where('content', 'like', "%{$search}%")->where('location_uuid', $location)->paginate(config('pagination.per_page'));
 
     }
 
     /**
-     * Gets the knowledge excerpt.
+     * Checks if there is a knowledge at the location.
      *
-     * @return string
+     * @param $location
+     * @return bool
      */
-    public function excerpt()
+    public static function isThereSomethingAt($location)
     {
 
-        if (strlen($this->content) > 97)
-            return substr($this->content, 0, 97) . '...';
+        return static::where('location_uuid', $location)->count() > 0;
 
-        return $this->content;
+    }
+
+    /**
+     * Gets a random knowledge from the given location.
+     *
+     * @param $location
+     * @return mixed
+     */
+    public static function random($location)
+    {
+
+        return static::with('user', 'location')->where('location_uuid', $location)->inRandomOrder()->first();
+
+    }
+
+    /**
+     * Checks if the knowledge was created by the user of the current location.
+     *
+     * @return bool
+     */
+    public function isForeign()
+    {
+
+        return $this->user->location_uuid != $this->location_uuid;
+
+    }
+
+    /**
+     * Format the knowledge data.
+     *
+     * @return array
+     */
+    public function present()
+    {
+
+        return [
+
+            'uuid' => $this->uuid,
+            'content' => $this->content,
+            'image' => Storage::url($this->image_medium),
+            'attachment' => Storage::url($this->attachment),
+            'created_at' => $this->created_at->toDateTimeString(),
+            'updated_at' => $this->updated_at->toDateTimeString(),
+            'is_foreign' => $this->isForeign(),
+            'user' => $this->presentUser(),
+            'location' => $this->location->present(),
+
+        ];
+
+    }
+
+    /**
+     * Presents a user.
+     *
+     * @return array
+     */
+    public function presentUser()
+    {
+
+        if ($this->user)
+            return $this->user->present();
+
+        $name = empty($this->user_name) ? trans('strings.anonymous') : $this->user_name;
+
+        return [
+            'name' => $name,
+            'picture' => Storage::url(config('images.default_profile')),
+            'profile' => null,
+        ];
+
+    }
+
+    /**
+     * Defines the relation to an user.
+     *
+     * @return BelongsTo
+     */
+    public function user()
+    {
+
+        return $this->belongsTo(User::class, 'user_uuid', 'uuid');
+
+    }
+
+    /**
+     * Defines the relation to a location.
+     *
+     * @return BelongsTo
+     */
+    public function location()
+    {
+
+        return $this->belongsTo(Location::class, 'location_uuid', 'uuid');
 
     }
 
