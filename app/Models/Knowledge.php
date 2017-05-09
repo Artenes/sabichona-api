@@ -2,6 +2,7 @@
 
 namespace Sabichona\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -71,7 +72,10 @@ class Knowledge extends Model
     public static function search($location, $search)
     {
 
-        return static::where('content', 'like', "%{$search}%")->where('location_uuid', $location)->paginate(config('pagination.per_page'));
+        return static::where('content', 'like', "%{$search}%")
+            ->where('location_uuid', $location)
+            ->orderBy('created_at', 'desc')
+            ->paginate(config('pagination.per_page'));
 
     }
 
@@ -125,13 +129,16 @@ class Knowledge extends Model
 
             'uuid' => $this->uuid,
             'content' => $this->content,
-            'image' => Storage::url($this->image_medium),
-            'attachment' => Storage::url($this->attachment),
-            'created_at' => $this->created_at->toDateTimeString(),
-            'updated_at' => $this->updated_at->toDateTimeString(),
+            'image' => !empty($this->image_medium) ? Storage::url($this->image_medium) : null,
+            'attachment' => !empty($this->attachment) ? Storage::url($this->attachment) : null,
+            'created_at' => $this->created_at->diffForHumans(),
+            'updated_at' => $this->updated_at->diffForHumans(),
             'is_foreign' => $this->isForeign(),
             'user' => $this->presentUser(),
             'location' => $this->location->present(),
+            'useful' => $this->useful_count,
+            'useless' => $this->useless_count,
+            'share' => $this->share_count,
 
         ];
 

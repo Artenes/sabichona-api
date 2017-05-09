@@ -24,11 +24,14 @@ class CreateKnowledgesTable extends Migration
             $table->string('user_uuid')->nullable();
             $table->string('user_name')->nullable();
             $table->string('location_uuid');
-            $table->string('image');
-            $table->string('image_medium');
-            $table->string('image_small');
+            $table->string('image')->nullable();
+            $table->string('image_medium')->nullable();
+            $table->string('image_small')->nullable();
             $table->longText('content');
-            $table->string('attachment');
+            $table->string('attachment')->nullable();
+            $table->unsignedInteger('useful_count')->default(0);
+            $table->unsignedInteger('useless_count')->default(0);
+            $table->unsignedInteger('share_count')->default(0);
             $table->timestamps();
 
             $table->foreign('user_uuid')->references('uuid')->on('users')->onUpdate('cascade')->onDelete('cascade');

@@ -54,6 +54,10 @@ $factory->define(Sabichona\Models\Knowledge::class, function (Faker\Generator $f
         'image_small' => 'images/example_small.png',
         'content' => $faker->text(500),
         'attachment' => 'attachments/example.pdf',
+        'useful_count' => $faker->randomNumber(2),
+        'useless_count' => $faker->randomNumber(2),
+        'share_count' => $faker->randomNumber(2),
+        'created_at' => $faker->dateTime,
 
     ];
 
