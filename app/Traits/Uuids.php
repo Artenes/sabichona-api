@@ -25,7 +25,7 @@ trait Uuids
             $primaryKey = $model->getKeyName();
 
             if (empty($model->{$primaryKey}))
-                $model->{$primaryKey} = Uuid::generate(config('uuid.version'));
+                $model->{$primaryKey} = Uuid::generate(config('uuid.version'))->string;
 
         });
 

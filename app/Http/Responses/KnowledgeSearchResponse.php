@@ -5,6 +5,7 @@ namespace Sabichona\Http\Responses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Sabichona\Http\ApiResponse;
 use Sabichona\Models\Knowledge;
 
 /**
@@ -23,19 +24,18 @@ class KnowledgeSearchResponse
     {
 
         $data = [
+            'knowledges' => []
+        ];
 
-            'she_said' => trans('setences.this_is_the_first_time'),
-            'state' => 'first',
+        $pagination = [
             'total' => 0,
             'per_page' => config('pagination.per_page'),
             'current_page' => 1,
             'next_page_url' => null,
             'prev_page_url' => null,
-            'knowledges' => []
-
         ];
 
-        return response()->json($data);
+        return ApiResponse::paginated('first', trans('setences.this_is_the_first_time'), $data, $pagination);
 
     }
 
@@ -50,22 +50,19 @@ class KnowledgeSearchResponse
     public function randomKnowledge(Knowledge $knowledge)
     {
 
-        $data = [
+        $data = [ 'knowledges' => [ $knowledge->present()] ];
 
-            'she_said' => trans('setences.i_dont_know_what_you_want'),
-            'state' => 'random',
+        $pagination = [
+
             'total' => 0,
             'per_page' => config('pagination.per_page'),
             'current_page' => 1,
             'next_page_url' => null,
             'prev_page_url' => null,
-            'knowledges' => [
-                $knowledge->present()
-            ]
 
         ];
 
-        return response()->json($data);
+        return ApiResponse::paginated('random', trans('setences.i_dont_know_what_you_want'), $data, $pagination);
 
     }
 
@@ -77,10 +74,10 @@ class KnowledgeSearchResponse
     public function foundNothing()
     {
 
-        $data = [
+        $data = [ 'knowledges' => [] ];
 
-            'she_said' => trans('setences.couldnt_find_something'),
-            'state' => 'nothing',
+        $pagination = [
+
             'total' => 0,
             'per_page' => config('pagination.per_page'),
             'current_page' => 1,
@@ -89,11 +86,10 @@ class KnowledgeSearchResponse
             'prev_page_url' => null,
             'from' => 1,
             'to' => 1,
-            'knowledges' => []
 
         ];
 
-        return response()->json($data);
+        return ApiResponse::paginated('nothing', trans('setences.couldnt_find_something'), $data, $pagination);
 
     }
 
@@ -109,23 +105,22 @@ class KnowledgeSearchResponse
 
         $append = ['search' => $search];
 
-        $data = [
+        $data = [ 'knowledges' => [] ];
 
-            'she_said' => trans('setences.have_some_knowledge'),
-            'state' => 'found',
+        $pagination = [
+
             'total' => $knowledges->total(),
             'per_page' => config('pagination.per_page'),
             'current_page' => $knowledges->currentPage(),
             'next_page_url' => $knowledges->appends($append)->nextPageUrl(),
             'prev_page_url' => $knowledges->appends($append)->previousPageUrl(),
-            'knowledges' => []
 
         ];
 
         foreach ($knowledges as $knowledge)
             $data['knowledges'][] = $knowledge->present();
 
-        return response()->json($data);
+        return ApiResponse::paginated('found', trans('setences.have_some_knowledge'), $data, $pagination);
 
     }
 

@@ -26,7 +26,7 @@ class SearchKnowledgeTest extends TestCase
 
         $response = $this->search();
 
-        $response->assertJson(['state' => 'first']);
+        $response->assertJson(['response' => ['state' => 'first']]);
 
     }
 
@@ -41,7 +41,7 @@ class SearchKnowledgeTest extends TestCase
 
         $response = $this->search('do_not_exist');
 
-        $response->assertJson(['state' => 'nothing']);
+        $response->assertJson(['response' => ['state' => 'nothing']]);
 
     }
 
@@ -56,7 +56,7 @@ class SearchKnowledgeTest extends TestCase
 
         $response = $this->search();
 
-        $response->assertJson(['state' => 'random']);
+        $response->assertJson(['response' => ['state' => 'random']]);
 
     }
 
@@ -71,15 +71,10 @@ class SearchKnowledgeTest extends TestCase
 
         $response = $this->search('find me!');
 
-        $response->assertJson(
-            [
-                'state' => 'found',
-                'total' => 20,
-                'knowledges' => [
-                    ['uuid' => $knowledge->first()->uuid]
-                ],
-            ]
-        );
+        $response->assertJson([
+            'response' => ['state' => 'found'],
+            'pagination' => ['total' => 20]
+        ]);
 
     }
 
