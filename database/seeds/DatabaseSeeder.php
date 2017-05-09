@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use Sabichona\Models\Knowledge;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,7 +13,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
 
-        factory(Knowledge::class, 10)->create();
+        $this->call(KnowledgesTableSeeder::class);
 
     }
 
