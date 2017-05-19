@@ -3,11 +3,13 @@
 namespace Sabichona\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Sabichona\Traits\Uuids;
 
@@ -118,6 +120,18 @@ class Knowledge extends Model
     }
 
     /**
+     * Checks to see if the knowledge is useful.
+     *
+     * @return bool
+     */
+    public function isUseful()
+    {
+
+        return ($this->useless_count - $this->useful_count) < 10;
+
+    }
+
+    /**
      * Format the knowledge data.
      *
      * @return array
@@ -162,6 +176,19 @@ class Knowledge extends Model
             'picture' => Storage::url(config('images.default_profile')),
             'profile' => null,
         ];
+
+    }
+
+    /**
+     * Scope to retur the most useful knowledges.
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeMostUseful(Builder $query)
+    {
+
+        return $query->select(DB::raw('*, (useful_count - useless_count) as useful_level'))->orderBy('useful_level', 'DESC');
 
     }
 

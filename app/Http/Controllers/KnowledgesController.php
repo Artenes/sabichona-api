@@ -6,6 +6,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Sabichona\Http\Requests\StoreKnowledgeRequest;
 use Sabichona\Http\Responses\KnowledgeSearchResponse;
+use Sabichona\Http\Responses\KnowledgeTypeResponse;
 use Sabichona\Models\Knowledge;
 
 /**
@@ -14,6 +15,36 @@ use Sabichona\Models\Knowledge;
  */
 class KnowledgesController extends Controller
 {
+
+    /**
+     * Fetchs all knowledges
+     *
+     * @param Request $request
+     * @return mixed
+     */
+    public function type(Request $request, KnowledgeTypeResponse $response)
+    {
+
+        $type = $request->get('type', 'latest');
+
+        $limit = 3;
+
+        if ($type == 'latest') {
+
+            $knowledges = Knowledge::latest()->take($limit)->get();
+            return $response->haveTheLatest($knowledges);
+
+        } else if ($type == 'useful') {
+
+            $knowledges = Knowledge::mostUseful()->limit($limit)->get();
+            return $response->haveTheMostUsefulOnes($knowledges);
+
+        }
+
+        $random = Knowledge::random($this->getLocation());
+        return $response->haveRandomKnowledge($random);
+
+    }
 
     /**
      * Shows the content of a knowledge.
@@ -71,7 +102,7 @@ class KnowledgesController extends Controller
     public function search(Request $request, KnowledgeSearchResponse $response)
     {
 
-        $location = $request->route('location');
+        $location = $this->getLocation();
         $search = $request->get('search');
 
         if (!Knowledge::isThereSomethingAt($location))

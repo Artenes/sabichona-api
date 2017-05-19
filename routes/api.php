@@ -16,5 +16,6 @@ use Illuminate\Http\Request;
 Route::resource('users', 'UsersController', ['only' => 'show']);
 
 Route::get('knowledges/search/{location}', 'KnowledgesController@search')->name('knowledges.search');
+Route::get('knowledges/type/{location}', 'KnowledgesController@type')->name('knowledges.type');
 
 Route::resource('knowledges', 'KnowledgesController', ['only' => ['store', 'show']]);
