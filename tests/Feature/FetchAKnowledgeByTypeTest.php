@@ -26,8 +26,8 @@ class FetchAKnowledgeByTypeTest extends TestCase
         $now = Carbon::now();
 
         $firstUuid = $this->createKnowledge(['created_at' => $now])->uuid;
-        $secondUuid = $this->createKnowledge(['created_at' => $now->subDay(1)])->uuid;
-        $thirdUuid = $this->createKnowledge(['created_at' => $now->subDay(2)])->uuid;
+        $secondUuid = $this->createKnowledge(['created_at' => $now->copy()->subDay(1)])->uuid;
+        $thirdUuid = $this->createKnowledge(['created_at' => $now->copy()->subDay(2)])->uuid;
 
         $response = $this->makeRequest();
 
@@ -77,10 +77,9 @@ class FetchAKnowledgeByTypeTest extends TestCase
     public function give_me_the_three_most_useful_knowledges()
     {
 
-        $veryUsefulUuid = $this->createKnowledge(['useful_count' => 56])->uuid;
-        $usefulUuid = $this->createKnowledge(['useful_count' => 12])->uuid;
-        $notSoUsefulUuid = $this->createKnowledge(['useful_count' => 5])->uuid;
-
+        $veryUsefulUuid = $this->createKnowledge(['useful_count' => 80, 'useless_count' => 32])->uuid;
+        $usefulUuid = $this->createKnowledge(['useful_count' => 40, 'useless_count' => 0])->uuid;
+        $notSoUsefulUuid = $this->createKnowledge(['useful_count' => 5, 'useless_count' => 90])->uuid;
         $response = $this->makeRequest('useful');
 
         $response->assertJson([
