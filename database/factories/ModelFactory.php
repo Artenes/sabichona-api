@@ -57,7 +57,6 @@ $factory->define(Sabichona\Models\Knowledge::class, function (Faker\Generator $f
         'useful_count' => $faker->randomNumber(2),
         'useless_count' => $faker->randomNumber(2),
         'share_count' => $faker->randomNumber(2),
-        'created_at' => $faker->dateTime,
 
     ];
 
