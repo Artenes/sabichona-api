@@ -10,4 +10,19 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
+    /**
+     * Gets the current uuid location from the request.
+     *
+     * @return string
+     */
+    protected function getLocation()
+    {
+
+        $request = app('request');
+
+        return $request->route('location');
+
+    }
+
 }
